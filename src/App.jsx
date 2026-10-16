@@ -1,22 +1,18 @@
-import Navbar from "./components/Navbar"
-import Hero from "./components/Hero"
-import Habitaciones from "./components/Habitaciones"
-import Servicios from "./components/Servicios"
-import Contacto from "./components/Contacto"
-import Footer from "./components/Footer"
+import { useState } from "react"
+import Home from "./pages/Home"
+import Dashboard from "./components/Dashboard"
+ 
+function App() {
+  const [autenticado, setAutenticado] = useState(false)
+  return autenticado ? (
+<Dashboard onLogout={() => setAutenticado(false)} />
 
-function App(){
-  return(
+  ) : (
+<Home onLogin={() => setAutenticado(true)} />
 
-<>
-<Navbar />
-<Hero />
-<Habitaciones />
-<Servicios />
-<Contacto />
-<Footer />
-</>
   )
-}
 
+}
+ 
 export default App
+ 

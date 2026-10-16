@@ -1,6 +1,6 @@
 import "./Navbar.css";
 
-function Navbar() {
+function Navbar({ abrirLogin }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark hotel-navbar sticky-top">
       <div className="container">
@@ -33,6 +33,9 @@ function Navbar() {
               <a href="#contacto" className="nav-link">Contacto</a>
             </li>
           </ul>
+          <button type="button" className="btn ms-lg-3" style={{backgroundColor: "#f3d6a4", color: "#344c5c"}} onClick={abrirLogin}>
+            Iniciar sesion
+          </button>
         </div>
       </div>
     </nav>

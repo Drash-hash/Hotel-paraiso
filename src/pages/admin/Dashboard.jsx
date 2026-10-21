@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Swal from 'sweetalert2'
 import './Dashboard.css'
  
 const reservas = [
@@ -11,7 +12,21 @@ const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
  
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
- 
+  const confirmarSalida =() =>{
+    Swal.fire({
+      title:"¿Deseas cerrar Sesión?",
+      text: "Regresaras a la pagina principal",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText:"Si, salir",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#344c5c"
+    }).then((resultado) => {
+      if (resultado.isConfirmed) {
+      onLogout()
+      }
+    })
+  }
   return (
     <div className="hp-dashboard">
       <aside className="hp-sidebar">
@@ -35,7 +50,7 @@ function Dashboard({ onLogout }) {
         <button
           className="hp-logout"
           type="button"
-          onClick={() => onLogout ? onLogout() : window.alert('Conectaremos el cierre de sesión al implementar el login.')}
+          onClick={confirmarSalida}
         >
           ↪ Cerrar sesión
         </button>

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import Home from "./pages/Home"
 import Dashboard from "./pages/admin/Dashboard"
+import ClienteDashboard from "./pages/cliente/ClienteDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
  
 function App() {
@@ -34,6 +35,11 @@ function App() {
         }
         />
         
+        <Route 
+        path="/cliente"
+        element={<ClienteDashboard onLogout={cerrarSesion}/>}
+        />
+
   </Routes>
   )
 }

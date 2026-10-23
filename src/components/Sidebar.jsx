@@ -40,7 +40,7 @@ function Sidebar({
             <button 
             className="hp-logout"
             type="button"
-            onclick={cerrarSesion}>
+            onClick={cerrarSesion}>
                   ↪ Cerrar sesión
             </button>
         </aside>

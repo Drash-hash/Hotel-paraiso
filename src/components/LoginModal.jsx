@@ -8,13 +8,18 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
   if (!mostrar) return null;
  
   const iniciarSesion = (e) => {
-    e.preventDefault();
+    e.preventDefault()
+
+    let rol = null
  
     if (
       correo.trim() === "admin@hotel.com" && 
-      password === "12345"
-    ) {
-
+      password === "12345") {
+        rol = "admin"
+      } else if (correo.trim() === "cliente@hotel.com" && password === "12345") {
+        rol = "cliente"
+      }
+      if (rol){
       Swal.fire({
         icon:"success",
         title: "Bienvenid@",
@@ -23,7 +28,7 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
         confirmButtonColor: "#344c5c"
       }).then(() => {
         cerrar()
-        onLogin()
+        onLogin(rol)
       })
 
     } else {

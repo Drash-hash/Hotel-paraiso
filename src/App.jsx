@@ -6,14 +6,15 @@ import ClienteDashboard from "./pages/cliente/ClienteDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
  
 function App() {
-  const [autenticado, setAutenticado] = useState(false)
+  const [usuario, setUsuario] = useState(null)
   const navigate = useNavigate()
-  const iniciarSesion = () => {
-    setAutenticado(true)
-    navigate("/admin")
+  
+  const iniciarSesion = (rol) => {
+    setUsuario(rol)
+    navigate(rol === "admin" ? "/admin" : "/cliente")
   }
   const cerrarSesion = () => {
-    setAutenticado(false)
+    setUsuario(null)
     navigate("/")
   }
   return (
@@ -27,7 +28,7 @@ function App() {
       <Route
         path="/admin"
         element={
-            <ProtectedRoute autenticado ={autenticado} > 
+            <ProtectedRoute usuario ={usuario} rolPermitido="admin" > 
             <Dashboard
             onLogout={cerrarSesion}
             />
@@ -37,7 +38,11 @@ function App() {
         
         <Route 
         path="/cliente"
-        element={<ClienteDashboard onLogout={cerrarSesion}/>}
+        element={
+          <ProtectedRoute usuario={usuario} rolPermitido="cliente">
+            <ClienteDashboard onLogout={cerrarSesion}/>
+          </ProtectedRoute>
+        }
         />
 
   </Routes>

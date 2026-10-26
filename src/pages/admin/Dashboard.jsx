@@ -2,21 +2,21 @@ import { useState, useEffect } from 'react'
 import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
-import ClienteDashboard from '../cliente/ClienteDashboard'
 import TablaReservas from '../../components/TablaReservas'
 import TablaHabitaciones from '../../components/TablaHabitaciones'
 
- const reservas = [
+const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
   { id: 'R-002', huesped: 'Carlos Ruiz', habitacion: 'Doble 105', fecha: '19/10/2026', estado: 'Pendiente' },
   { id: 'R-003', huesped: 'Ana Torres', habitacion: 'Suite 203', fecha: '20/10/2026', estado: 'Confirmada' },
 ]
- 
+
 const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
- 
+
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
   const [reservasClientes, setReservasClientes] = useState([])
+
   useEffect(() => {
     const guardadas = localStorage.getItem("reservasHotel")
     setReservasClientes(guardadas ? JSON.parse(guardadas) : [])
@@ -27,34 +27,35 @@ function Dashboard({ onLogout }) {
   ).length
 
   const pendientes = reservasClientes.filter(
-    reserva => reserva.pendiente === "Pendiente"
+    reserva => reserva.estado === "Pendiente"
   ).length
 
-  const confirmarSalida =() =>{
+  const confirmarSalida = () => {
     Swal.fire({
-      title:"¿Deseas cerrar Sesión?",
+      title: "¿Deseas cerrar Sesión?",
       text: "Regresaras a la pagina principal",
       icon: "question",
       showCancelButton: true,
-      confirmButtonText:"Si, salir",
+      confirmButtonText: "Si, salir",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#344c5c"
     }).then((resultado) => {
       if (resultado.isConfirmed) {
-      onLogout()
+        onLogout()
       }
     })
   }
+
   return (
     <div className="hp-dashboard">
       <Sidebar
-      titulo='Administración'
-      opciones={secciones}
-      seccion={seccion}
-      cambiarSeccion={setSeccion}
-      cerrarSesion={confirmarSalida}
+        titulo='Administración'
+        opciones={secciones}
+        seccion={seccion}
+        cambiarSeccion={setSeccion}
+        cerrarSesion={confirmarSalida}
       />
- 
+
       <main className="hp-main">
         <header className="hp-header">
           <div>
@@ -64,15 +65,15 @@ function Dashboard({ onLogout }) {
           </div>
           <div className="hp-user"><span className="hp-avatar">A</span><span>Administrador</span></div>
         </header>
- 
+
         {seccion === 'Resumen' ? (
           <>
             <section className="hp-stats" aria-label="Indicadores del hotel">
               {[
                 { titulo: 'Habitaciones', valor: '24', detalle: 'Total registradas', icono: '▤' },
                 { titulo: 'Reservas', valor: reservasClientes.length, detalle: 'Reservas activas', icono: '▣' },
-                { titulo: 'Confrimadas', valor: confirmadas, detalle: 'Reservas confirmadas', icono: '✔️'},
-                { titulo: 'Pendientes', valor: pendientes, detalle: 'Reservas pendientes', icono: '✔️'},
+                { titulo: 'Confirmadas', valor: confirmadas, detalle: 'Reservas confirmadas', icono: '✔️' },
+                { titulo: 'Pendientes', valor: pendientes, detalle: 'Reservas pendientes', icono: '⏳' },
                 { titulo: 'Huéspedes', valor: '42', detalle: 'Huéspedes registrados', icono: '♙' },
                 { titulo: 'Ocupación', valor: '75%', detalle: 'Ocupación estimada', icono: '◕' },
               ].map((dato) => (
@@ -83,7 +84,7 @@ function Dashboard({ onLogout }) {
                 </article>
               ))}
             </section>
- 
+
             <section className="hp-panel">
               <div className="hp-panel-header"><div><h2>Reservas recientes</h2><p>Últimos registros del hotel</p></div><span className="hp-demo-tag">Datos de ejemplo</span></div>
               <div className="hp-table-wrap">
@@ -115,7 +116,7 @@ function Dashboard({ onLogout }) {
               </div>
             </section>
           </>
-        ): seccion === "Habitaciones" ? (
+        ) : seccion === "Habitaciones" ? (
           <TablaHabitaciones />
         ) : seccion === "Reservas" ? (
           <TablaReservas />
@@ -132,5 +133,5 @@ function Dashboard({ onLogout }) {
     </div>
   )
 }
- 
+
 export default Dashboard

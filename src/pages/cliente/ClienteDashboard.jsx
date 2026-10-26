@@ -9,19 +9,19 @@ function ClienteDashboard({ onLogout }){
 
 return (
     <div className="hp-dashboard">
-        <Sidebar 
-        titulo="Espacio del cliente"
-        opciones={opciones}
-        seccion={seccion}
-        cambiarSeccion={setSeccion}
-        cerrarSesion={onLogout}
+        <Sidebar
+         titulo="Espacio del cliente"
+         opciones={opciones}
+         seccion={seccion}
+         cambiarSeccion={setSeccion}
+         cerrarSesion={onLogout}           
         />
 <main className="hp-main">
     <header className="hp-header">
         <div>
             <p className="hp-eyebrown">PANEL DEL CLIENTE</p>
             <h1>{seccion}</h1>
-            <p>Bienvenido al Hotel Paraiso</p>
+            <p>Bienvenido al hotel Paraiso</p>
         </div>
     </header>
     <section className="hp-panel">
@@ -29,8 +29,8 @@ return (
             <h2>{seccion}</h2>
             <p>
                 {seccion === "Mis reservas"
-                ? "Consulta aqui tus reservas"
-                : "Aqui podras consultar tu información personal."
+                   ? "Consulta aqui tus reservas"
+                   : "Aqui podras consultar tu información personal."
             }
             </p>
         </div>

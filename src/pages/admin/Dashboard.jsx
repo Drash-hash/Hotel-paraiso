@@ -4,8 +4,9 @@ import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
 import ClienteDashboard from '../cliente/ClienteDashboard'
 import TablaReservas from '../../components/TablaReservas'
- 
-const reservas = [
+import TablaHabitaciones from '../../components/TablaHabitaciones'
+
+ const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
   { id: 'R-002', huesped: 'Carlos Ruiz', habitacion: 'Doble 105', fecha: '19/10/2026', estado: 'Pendiente' },
   { id: 'R-003', huesped: 'Ana Torres', habitacion: 'Suite 203', fecha: '20/10/2026', estado: 'Confirmada' },
@@ -114,6 +115,8 @@ function Dashboard({ onLogout }) {
               </div>
             </section>
           </>
+        ): seccion === "Habitaciones" ? (
+          <TablaHabitaciones />
         ) : seccion === "Reservas" ? (
           <TablaReservas />
         ) : (

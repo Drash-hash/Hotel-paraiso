@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
@@ -15,12 +15,10 @@ const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
 
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
-  const [reservasClientes, setReservasClientes] = useState([])
-
-  useEffect(() => {
+  const [reservasClientes, setReservasClientes] = useState(() => {
     const guardadas = localStorage.getItem("reservasHotel")
-    setReservasClientes(guardadas ? JSON.parse(guardadas) : [])
-  }, [])
+    return guardadas ? JSON.parse(guardadas) : []
+  })
 
   const confirmadas = reservasClientes.filter(
     reserva => reserva.estado === "Confirmada"
@@ -101,7 +99,7 @@ function Dashboard({ onLogout }) {
                     {reservasClientes.map((reserva) => (
                       <tr key={`cliente-${reserva.id}`}>
                         <td>{reserva.id}</td>
-                        <td>Cliente</td>
+                        <td>{reserva.clienteNombre || 'Sin cliente asignado'}</td>
                         <td>{reserva.habitacion}</td>
                         <td>{reserva.entrada}</td>
                         <td>
@@ -119,7 +117,7 @@ function Dashboard({ onLogout }) {
         ) : seccion === "Habitaciones" ? (
           <TablaHabitaciones />
         ) : seccion === "Reservas" ? (
-          <TablaReservas />
+          <TablaReservas onReservasChange={setReservasClientes} />
         ) : (
           <section className="hp-panel hp-placeholder">
             <span className="hp-placeholder-icon">✦</span>

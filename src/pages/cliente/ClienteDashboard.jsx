@@ -2,9 +2,10 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import Sidebar from "../../components/Sidebar";
 import TablaReservas from "../../components/TablaReservas";
+import PerfilCliente from "../../components/PerfilCliente";
 import "../admin/Dashboard.css"
 
-function ClienteDashboard({ onLogout }) {
+function ClienteDashboard({ cliente, onGuardarPerfil, onLogout }) {
     const [seccion, setSeccion] = useState("Mis reservas")
     const opciones = ["Mis reservas", "Mi perfil"]
 
@@ -38,7 +39,7 @@ function ClienteDashboard({ onLogout }) {
                     <div>
                         <p className="hp-eyebrow">PANEL DEL CLIENTE</p>
                         <h1>{seccion}</h1>
-                        <p>Bienvenido al Hotel Paraiso</p>
+                        <p>Bienvenido, {cliente?.nombreCompleto || cliente?.correo}</p>
                     </div>
                 </header>
                 <section className="hp-panel">
@@ -46,12 +47,17 @@ function ClienteDashboard({ onLogout }) {
                         <h2>{seccion}</h2>
                         <p>
                             {seccion === "Mis reservas"
-                                ? "Consulta aqui tus reservas"
-                                : "Aqui podras consultar tu información personal."
+                                ? "Consulta aquí tus reservas"
+                                : "Consulta y actualiza tu información personal."
                             }
                         </p>
                     </div>
-                    {seccion === "Mis reservas" && <TablaReservas />}
+                    {seccion === "Mis reservas" && (
+                        <TablaReservas clienteId={cliente.id} cliente={cliente} esAdmin={false} />
+                    )}
+                    {seccion === "Mi perfil" && (
+                        <PerfilCliente cliente={cliente} onGuardarPerfil={onGuardarPerfil} />
+                    )}
                 </section>
             </main>
         </div>

@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import FormularioReserva from "./FormularioReserva";
 import { generarCodigoReserva } from "../utils/reservasHotel";
 import { obtenerHabitaciones } from "../utils/habitacionesHotel";
+import { clienteEstaActivo, obtenerClientes } from "../utils/clientesHotel";
 
 const reservasIniciales = [
     {
@@ -35,7 +36,32 @@ function TablaReservas({ clienteId, cliente, esAdmin = true, onReservasChange })
         onReservasChange?.(reservas);
     }, [reservas, onReservasChange]);
 
+    const validarClienteActivo = async () => {
+        try {
+            const clienteActual = obtenerClientes().find(
+                (item) => String(item.id) === String(clienteId)
+            );
+            if (clienteEstaActivo(clienteActual)) return true;
+
+            await Swal.fire({
+                icon: "warning",
+                title: "Cuenta inactiva",
+                text: "No puedes crear reservas mientras tu cuenta esté inactiva. Contacta al administrador."
+            });
+        } catch (error) {
+            await Swal.fire({
+                icon: "error",
+                title: "No se pudo validar tu cuenta",
+                text: error.message || "Revisa tus datos e inténtalo nuevamente."
+            });
+        }
+
+        return false;
+    };
+
     const abrirFormulario = async (reserva = null) => {
+        if (!esAdmin && !reserva && !(await validarClienteActivo())) return;
+
         let habitaciones = [];
         if (!esAdmin) {
             try {
@@ -59,7 +85,7 @@ function TablaReservas({ clienteId, cliente, esAdmin = true, onReservasChange })
                 esAdmin={esAdmin}
                 habitaciones={habitaciones}
                 reservasExistentes={reservas}
-                guardar={(datos) => {
+                guardar={async (datos) => {
                     if (reserva) {
                         setReservas((actuales) => actuales.map((actual) =>
                             actual.id === reserva.id
@@ -68,6 +94,8 @@ function TablaReservas({ clienteId, cliente, esAdmin = true, onReservasChange })
                         ));
                     } else {
                         try {
+                            if (!esAdmin && !(await validarClienteActivo())) return;
+
                             const nuevaReserva = {
                                 ...datos,
                                 id: generarCodigoReserva(reservas),

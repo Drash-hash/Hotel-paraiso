@@ -1,11 +1,13 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import {
+  clienteEstaActivo,
   crearIdCliente,
   guardarClientes,
   normalizarCorreo,
   obtenerClientes
 } from "../utils/clientesHotel";
+import { empleadoEstaActivo, normalizarCorreoEmpleado, obtenerEmpleados } from "../utils/empleadosHotel";
  
 function LoginModal({ mostrar, cerrar, onLogin }) {
   const [modo, setModo] = useState("login");
@@ -22,6 +24,7 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
     try {
       const emailNormalizado = normalizarCorreo(correo);
       let clienteAutenticado = null;
+      let empleadoAutenticado = null;
 
       if (modo === "registro") {
         if (password !== confirmarPassword) {
@@ -59,6 +62,7 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
           nombreCompleto: nombreCompleto.trim(),
           correo: emailNormalizado,
           password,
+          estado: "activo",
           telefono: "",
           ciudad: "",
           direccion: ""
@@ -76,32 +80,52 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
         onLogin({ rol: "admin" });
         return;
       } else {
-        const clientes = obtenerClientes();
-        clienteAutenticado = clientes.find(
-          (cliente) =>
-            normalizarCorreo(cliente.correo) === emailNormalizado &&
-            cliente.password === password
+        const empleados = obtenerEmpleados();
+        const empleadoPorCorreo = empleados.find(
+          (empleado) => normalizarCorreoEmpleado(empleado.correo || "") === emailNormalizado
         );
 
-        const cuentaExiste = clientes.some(
-          (cliente) => normalizarCorreo(cliente.correo) === emailNormalizado
-        );
-        if (!clienteAutenticado && !cuentaExiste && emailNormalizado === "cliente@hotel.com" && password === "12345") {
-          const perfilAnterior = localStorage.getItem("perfilClienteHotel");
-          const datosPerfil = perfilAnterior ? JSON.parse(perfilAnterior) : {};
-          clienteAutenticado = {
-            id: "cliente-demo",
-            nombreCompleto: datosPerfil.nombreCompleto || "",
-            correo: "cliente@hotel.com",
-            password: "12345",
-            telefono: datosPerfil.telefono || "",
-            ciudad: datosPerfil.ciudad || "",
-            direccion: datosPerfil.direccion || ""
-          };
-          guardarClientes([...clientes, clienteAutenticado]);
+        if (empleadoPorCorreo) {
+          if (!empleadoEstaActivo(empleadoPorCorreo)) {
+            await Swal.fire({
+              icon: "error",
+              title: "Cuenta inactiva",
+              text: "Tu cuenta de empleado está inhabilitada. Contacta con administración.",
+              confirmButtonColor: "#344c5c"
+            });
+            return;
+          }
+          empleadoAutenticado = empleadoPorCorreo.password === password ? empleadoPorCorreo : null;
+        } else {
+          const clientes = obtenerClientes();
+          clienteAutenticado = clientes.find(
+            (cliente) =>
+              normalizarCorreo(cliente.correo) === emailNormalizado &&
+              cliente.password === password &&
+              clienteEstaActivo(cliente)
+          );
+
+          const cuentaExiste = clientes.some(
+            (cliente) => normalizarCorreo(cliente.correo) === emailNormalizado
+          );
+          if (!clienteAutenticado && !cuentaExiste && emailNormalizado === "cliente@hotel.com" && password === "12345") {
+            const perfilAnterior = localStorage.getItem("perfilClienteHotel");
+            const datosPerfil = perfilAnterior ? JSON.parse(perfilAnterior) : {};
+            clienteAutenticado = {
+              id: "cliente-demo",
+              nombreCompleto: datosPerfil.nombreCompleto || "",
+              correo: "cliente@hotel.com",
+              password: "12345",
+              estado: "activo",
+              telefono: datosPerfil.telefono || "",
+              ciudad: datosPerfil.ciudad || "",
+              direccion: datosPerfil.direccion || ""
+            };
+            guardarClientes([...clientes, clienteAutenticado]);
+          }
         }
 
-        if (!clienteAutenticado) {
+        if (!empleadoAutenticado && !clienteAutenticado) {
           await Swal.fire({
             icon: "error",
             title: "Acceso denegado",
@@ -123,7 +147,11 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
         confirmButtonColor: "#344c5c"
       });
       cerrar();
-      onLogin({ rol: "cliente", cliente: clienteAutenticado });
+      if (empleadoAutenticado) {
+        onLogin({ rol: "empleado", empleado: empleadoAutenticado });
+      } else {
+        onLogin({ rol: "cliente", cliente: clienteAutenticado });
+      }
     } catch (error) {
       await Swal.fire({
         icon: "error",
@@ -156,7 +184,7 @@ function LoginModal({ mostrar, cerrar, onLogin }) {
           <div className="modal-body px-4 pb-4">
             <p className="text-muted">
               {modo === "login"
-                ? "Ingresa a tu cuenta del hotel"
+                ? "Ingresa a tu cuenta del hotel. El personal usa las credenciales creadas por administración."
                 : "Regístrate para gestionar tus reservas"}
             </p>
  

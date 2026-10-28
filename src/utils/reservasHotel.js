@@ -2,6 +2,18 @@ const RESERVAS_STORAGE_KEY = "reservasHotel";
 const CONTADOR_RESERVAS_KEY = "contadorReservasHotel";
 const CODIGO_RESERVA_PATTERN = /^RES-(\d+)$/i;
 
+export function obtenerReservas() {
+    const guardadas = localStorage.getItem(RESERVAS_STORAGE_KEY);
+    if (!guardadas) return [];
+
+    const reservas = JSON.parse(guardadas);
+    if (!Array.isArray(reservas)) {
+        throw new Error("Los datos guardados de reservas no tienen un formato válido.");
+    }
+
+    return reservas;
+}
+
 function obtenerMayorConsecutivo(reservas) {
     return reservas.reduce((mayor, reserva) => {
         const coincidencia = String(reserva.id).match(CODIGO_RESERVA_PATTERN);

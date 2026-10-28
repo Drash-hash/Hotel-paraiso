@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import Swal from 'sweetalert2'
+import DataTable from 'react-data-table-component'
 import Sidebar from '../../components/Sidebar'
 import './Dashboard.css'
 import TablaReservas from '../../components/TablaReservas'
 import TablaHabitaciones from '../../components/TablaHabitaciones'
+import GestionHuespedes from '../../components/GestionHuespedes'
+import TablaEmpleados from '../../components/TablaEmpleados'
+import GestionAsignaciones from '../../components/GestionAsignaciones'
+import { obtenerClientes } from '../../utils/clientesHotel'
 
 const reservas = [
   { id: 'R-001', huesped: 'Laura Gómez', habitacion: 'Suite 201', fecha: '18/10/2026', estado: 'Confirmada' },
@@ -11,7 +16,7 @@ const reservas = [
   { id: 'R-003', huesped: 'Ana Torres', habitacion: 'Suite 203', fecha: '20/10/2026', estado: 'Confirmada' },
 ]
 
-const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes']
+const secciones = ['Resumen', 'Habitaciones', 'Reservas', 'Huéspedes', 'Empleados', 'Asignaciones']
 
 function Dashboard({ onLogout }) {
   const [seccion, setSeccion] = useState('Resumen')
@@ -19,6 +24,7 @@ function Dashboard({ onLogout }) {
     const guardadas = localStorage.getItem("reservasHotel")
     return guardadas ? JSON.parse(guardadas) : []
   })
+  const clientes = obtenerClientes()
 
   const confirmadas = reservasClientes.filter(
     reserva => reserva.estado === "Confirmada"
@@ -27,6 +33,40 @@ function Dashboard({ onLogout }) {
   const pendientes = reservasClientes.filter(
     reserva => reserva.estado === "Pendiente"
   ).length
+
+  const reservasResumen = [
+    ...reservas.map((reserva) => ({
+      id: reserva.id,
+      huesped: reserva.huesped,
+      habitacion: reserva.habitacion,
+      ingreso: reserva.fecha,
+      estado: reserva.estado
+    })),
+    ...reservasClientes.map((reserva) => ({
+      id: `cliente-${reserva.id}`,
+      huesped: reserva.clienteNombre || "Sin cliente asignado",
+      habitacion: reserva.habitacion,
+      ingreso: reserva.entrada || reserva.fecha || "—",
+      estado: reserva.estado
+    }))
+  ]
+
+  const columnasReservasRecientes = [
+    { name: "Código", selector: (fila) => fila.id.replace("cliente-", ""), sortable: true },
+    { name: "Huésped", selector: (fila) => fila.huesped, sortable: true },
+    { name: "Habitación", selector: (fila) => fila.habitacion || "—", sortable: true },
+    { name: "Ingreso", selector: (fila) => fila.ingreso, sortable: true },
+    {
+      name: "Estado",
+      selector: (fila) => fila.estado,
+      sortable: true,
+      cell: (fila) => (
+        <span className={`hp-status ${fila.estado === "Confirmada" ? "confirmed" : "pending"}`}>
+          {fila.estado}
+        </span>
+      )
+    }
+  ]
 
   const confirmarSalida = () => {
     Swal.fire({
@@ -72,7 +112,7 @@ function Dashboard({ onLogout }) {
                 { titulo: 'Reservas', valor: reservasClientes.length, detalle: 'Reservas activas', icono: '▣' },
                 { titulo: 'Confirmadas', valor: confirmadas, detalle: 'Reservas confirmadas', icono: '✔️' },
                 { titulo: 'Pendientes', valor: pendientes, detalle: 'Reservas pendientes', icono: '⏳' },
-                { titulo: 'Huéspedes', valor: '42', detalle: 'Huéspedes registrados', icono: '♙' },
+                { titulo: 'Huéspedes', valor: clientes.length, detalle: 'Huéspedes registrados', icono: '♙' },
                 { titulo: 'Ocupación', valor: '75%', detalle: 'Ocupación estimada', icono: '◕' },
               ].map((dato) => (
                 <article className="hp-stat" key={dato.titulo}>
@@ -85,39 +125,30 @@ function Dashboard({ onLogout }) {
 
             <section className="hp-panel">
               <div className="hp-panel-header"><div><h2>Reservas recientes</h2><p>Últimos registros del hotel</p></div><span className="hp-demo-tag">Datos de ejemplo</span></div>
-              <div className="hp-table-wrap">
-                <table className="hp-table">
-                  <thead><tr><th>Código</th><th>Huésped</th><th>Habitación</th><th>Ingreso</th><th>Estado</th></tr></thead>
-                  <tbody>
-                    {reservas.map((reserva) => (
-                      <tr key={reserva.id}>
-                        <td>{reserva.id}</td><td>{reserva.huesped}</td><td>{reserva.habitacion}</td><td>{reserva.fecha}</td>
-                        <td><span className={`hp-status ${reserva.estado === 'Confirmada' ? 'confirmed' : 'pending'}`}>{reserva.estado}</span></td>
-                      </tr>
-                    ))}
-
-                    {reservasClientes.map((reserva) => (
-                      <tr key={`cliente-${reserva.id}`}>
-                        <td>{reserva.id}</td>
-                        <td>{reserva.clienteNombre || 'Sin cliente asignado'}</td>
-                        <td>{reserva.habitacion}</td>
-                        <td>{reserva.entrada}</td>
-                        <td>
-                          <span className={`hp-status ${reserva.estado === "Confirmada" ? "confirmed" : "pending"}`}>
-                            {reserva.estado}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                columns={columnasReservasRecientes}
+                data={reservasResumen}
+                keyField="id"
+                pagination
+                paginationPerPage={5}
+                paginationRowsPerPageOptions={[5, 10, 15]}
+                highlightOnHover
+                striped
+                responsive
+                noDataComponent="No hay reservas para mostrar"
+              />
             </section>
           </>
         ) : seccion === "Habitaciones" ? (
           <TablaHabitaciones />
         ) : seccion === "Reservas" ? (
           <TablaReservas onReservasChange={setReservasClientes} />
+        ) : seccion === "Huéspedes" ? (
+          <GestionHuespedes />
+        ) : seccion === "Empleados" ? (
+          <TablaEmpleados />
+        ) : seccion === "Asignaciones" ? (
+          <GestionAsignaciones />
         ) : (
           <section className="hp-panel hp-placeholder">
             <span className="hp-placeholder-icon">✦</span>

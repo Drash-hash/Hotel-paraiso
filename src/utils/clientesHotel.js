@@ -4,6 +4,11 @@ export function normalizarCorreo(correo) {
     return correo.trim().toLocaleLowerCase();
 }
 
+export function clienteEstaActivo(cliente) {
+    if (!cliente) return false;
+    return String(cliente.estado || "").trim().toLocaleLowerCase() !== "inactivo";
+}
+
 export function obtenerClientes() {
     const guardados = localStorage.getItem(CLIENTES_STORAGE_KEY);
     if (!guardados) return [];

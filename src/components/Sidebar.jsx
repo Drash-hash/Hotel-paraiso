@@ -10,8 +10,11 @@ function Sidebar({
         Resumen: "bi-grid-1x2",
         Habitaciones: "bi-door-open",
         Reservas: "bi-calendar-check",
+        Empleados: "bi-people",
+        Asignaciones: "bi-list-task",
         Huéspedes: "bi-person-circle",
         "Mis reservas": "bi-calendar2-date",
+        "Mis tareas": "bi-list-check",
         "Mi perfil": "bi-person-badge"
     }
     return (

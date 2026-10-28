@@ -4,31 +4,47 @@ import Home from "./pages/Home"
 import Dashboard from "./pages/admin/Dashboard"
 import ClienteDashboard from "./pages/cliente/ClienteDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
-import { guardarClientes, obtenerClientes } from "./utils/clientesHotel"
+import { clienteEstaActivo, guardarClientes, obtenerClientes } from "./utils/clientesHotel"
+import { empleadoEstaActivo, obtenerEmpleados } from "./utils/empleadosHotel"
+import EmpleadoDashboard from "./pages/empleado/EmpleadoDashboard"
  
 function App() {
   const [sesion, setSesion] = useState(() => {
     const rol = localStorage.getItem("usuarioHotel")
     if (rol === "admin") return { rol }
-    if (rol !== "cliente") return null
 
     const clienteId = localStorage.getItem("clienteActivoHotel")
-    const cliente = obtenerClientes().find((item) => item.id === clienteId)
-    return cliente ? { rol, cliente } : null
+    if (rol === "cliente") {
+      const cliente = obtenerClientes().find((item) => item.id === clienteId)
+      return clienteEstaActivo(cliente) ? { rol, cliente } : null
+    }
+
+    if (rol === "empleado") {
+      const empleadoId = localStorage.getItem("empleadoActivoHotel")
+      const empleado = obtenerEmpleados().find((item) => item.id === empleadoId)
+      return empleadoEstaActivo(empleado) ? { rol, empleado } : null
+    }
+    return null
   })
 
   const navigate = useNavigate()
   
-  const iniciarSesion = ({ rol, cliente }) => {
+  const iniciarSesion = ({ rol, cliente, empleado }) => {
     localStorage.setItem("usuarioHotel", rol)
     if (rol === "cliente") {
       localStorage.setItem("clienteActivoHotel", cliente.id)
+      localStorage.removeItem("empleadoActivoHotel")
       setSesion({ rol, cliente })
+    } else if (rol === "empleado") {
+      localStorage.setItem("empleadoActivoHotel", empleado.id)
+      localStorage.removeItem("clienteActivoHotel")
+      setSesion({ rol, empleado })
     } else {
       localStorage.removeItem("clienteActivoHotel")
+      localStorage.removeItem("empleadoActivoHotel")
       setSesion({ rol })
     }
-    navigate(rol === "admin" ? "/admin" : "/cliente")
+    navigate(rol === "admin" ? "/admin" : rol === "empleado" ? "/empleado" : "/cliente")
   }
 
   const guardarPerfilCliente = (datosActualizados) => {
@@ -48,6 +64,7 @@ function App() {
     setSesion(null)
     localStorage.removeItem("usuarioHotel")
     localStorage.removeItem("clienteActivoHotel")
+    localStorage.removeItem("empleadoActivoHotel")
     navigate("/")
   }
   return (
@@ -80,6 +97,18 @@ function App() {
             />
           </ProtectedRoute>
         }
+        />
+
+        <Route
+          path="/empleado"
+          element={
+            <ProtectedRoute usuario={sesion?.rol} rolPermitido="empleado">
+              <EmpleadoDashboard
+                empleado={sesion?.empleado}
+                onLogout={cerrarSesion}
+              />
+            </ProtectedRoute>
+          }
         />
 
   </Routes>
